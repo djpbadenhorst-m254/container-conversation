@@ -1,21 +1,23 @@
 {
-  "name": "container-messaging",
+  "name": "container-conversations",
   "version": "1.0.0",
-  "description": "",
   "main": "src/index.js",
   "scripts": {
-    "migrations-up": "knex migrate:up",
-    "migrations-down": "knex migrate:down",
+    "knex": "knex",
     "server": "node --max_old_space_size=4096 src/server.js",
     "tests": "jasmine --config=jasmine.json"
   },
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "africastalking": "^0.6.3",
     "express": "^4.18.2",
-    "jasmine": "^5.1.0",
+    "json-logic-js": "^2.0.2",
     "knex": "^2.5.1",
-    "mysql2": "^3.6.1"
+    "lodash": "^4.17.21",
+    "mysql2": "^3.6.1",
+    "nunjucks": "^3.2.4",
+    "xmlhttprequest": "^1.8.0"
+  },
+  "devDependencies": {
+    "jasmine": "^5.1.0"
   }
 }

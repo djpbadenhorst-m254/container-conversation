@@ -2,11 +2,11 @@ const test_01 = async () => {
   console.log('here')
 };
 
-describe('test', function() {  
+describe('scratch', function() {  
   beforeAll(()=>{
     process.env['DATAWAREHOUSE_HOST'] = '0.0.0.0';
   });
 
-  it('test: Test', test_01);
+  it('test_01: Test', test_01);
 });
 

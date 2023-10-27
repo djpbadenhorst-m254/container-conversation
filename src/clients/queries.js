@@ -25,10 +25,13 @@ const getSpeaker = ({
     throw new Error('Insuficient Ids');
   }
 
-  return db('speakers').where(query).select('id').then(speakers=>{
+  return db('speakers').where(query).select('*').then(speakers=>{
     if (speakers.length==0) {
       return db('speakers').insert([query]).then(x=>{
-	return db('speakers').where(query).select('id').first();
+	return db('speakers').where(query).select('*').first().then(async speaker=>{
+	  await updateSpeakerData(speaker.id, query);
+	  return speaker;
+	});
       });
     } else if (speakers.length==1) {
       return speakers[0];
@@ -37,7 +40,17 @@ const getSpeaker = ({
     }
   });
 };
-const getSpeakerConversations = (speakerId, allowedStatus=[]) => {
+const createConversation = (speakerId) => {
+  let db = getKnex();
+  if (speakerId) {
+    let data = {speaker_id: speakerId, status: 'active', last_interaction_code: 'INIT'};
+    return db('conversations').insert([data])
+      .then(x=>db('conversations').where(data).first());
+  } else {
+    throw new Error('No Speaker Id');
+  }
+};
+const getConversationsBySpeakerId = (speakerId, allowedStatus=[]) => {
   let db = getKnex();
   if (speakerId) {
     let data = {speaker_id: speakerId};
@@ -46,30 +59,9 @@ const getSpeakerConversations = (speakerId, allowedStatus=[]) => {
     if (allowedStatus.length!=0)
       result = result.whereIn('status',allowedStatus);
     
-    result = result.orderBy('ts_created', 'asc');
-    return result.then(conversations => {
-      if (conversations.length==0)
-	return db('conversations').insert([{status:'active', ...data}]).then(x=>{
-	  result = db('conversations').where(data);
-	  
-	  if (allowedStatus.length!=0)
-	    result = result.whereIn('status',allowedStatus);
-	  
-	  return result;
-	});
-      else
-	return conversations;
-    });
+    return result.orderBy('ts_created', 'desc');
   } else {
     throw new Error('No Speaker Id');
-  }
-};
-const getConversation = (conversationId) => {
-  let db = getKnex();
-  if (conversationId) {
-    return db('conversations').where({id: conversationId});
-  } else {
-    throw new Error('No Conversation Id');
   }
 };
 const updateConversation = (conversationId, data) => {
@@ -78,61 +70,40 @@ const updateConversation = (conversationId, data) => {
     .update(data)
     .where({id: conversationId});
 };
-
 const getSpeakerData = (speakerId) => {
   let db = getKnex();
   return db('speaker_data').where({speaker_id:speakerId}).select('*')
     .then(x=>x[0]?.speaker_data);
 };
-
-const updateSpeakerData = (speakerId, data) => {
+const updateSpeakerData = (speakerId, data={}) => {
   let db = getKnex();
   return getSpeakerData(speakerId).then(speakerData=>{
-    if (speakerData)
+    if (speakerData) {
       return db('speaker_data')
-        .update({speaker_data: JSON.stringify(data)})
+        .update({speaker_data: JSON.stringify({...speakerData, ...data})})
         .where({speaker_id: speakerId});
-    else
-      return db('speaker_data').insert([{speaker_id: speakerId, speaker_data:data}])
+    } else
+      return db('speaker_data').insert([{speaker_id: speakerId, speaker_data:data}]);
   });
+};
+const logResponse = (data) => {
+  data = {
+    ts: data.timestamp,
+    speaker_id: data.speakerId,
+    conversation_id: data.conversationId,
+    channel: data.channel,
+    payload: data.payload,
+  };
+  let db = getKnex();
+  return db('responses').insert([data]);
 };
 
 module.exports={
   getSpeaker: getSpeaker,
-  getSpeakerConversations: getSpeakerConversations,
-  getConversation: getConversation,
+  createConversation: createConversation,
+  getConversationsBySpeakerId: getConversationsBySpeakerId,
   updateConversation: updateConversation,
   getSpeakerData: getSpeakerData,
   updateSpeakerData: updateSpeakerData,
+  logResponse: logResponse,
 };
-
-/*
-const _removeNull = (obj) => _.pickBy(obj, (value, key) => (value !== null) );
-const combineSpeakers = async (speakerId1, speakerId2) => {
-  let db = getKnex();
-  await db('conversations')
-    .update({speaker_id: speakerId1})
-    .where({speaker_id: speakerId2});
-  
-  return db('speakers')
-    .where('id', speakerId1)
-    .then(speaker1 => {
-      return db('speakers')
-	.where('id', speakerId2)
-	.then(speaker2 => {
-	  let s1 = _removeNull({...speaker1[0]});
-	  let s2 = _removeNull({...speaker2[0]});
-	  delete s2.id;
-
-	  let updatedSpeaker = {...s1, ...s2};
-	  return db('speakers')
-	    .update(updatedSpeaker)
-	    .where('id', updatedSpeaker.id)
-	    .then(() =>
-	      db('speakers').delete().where({id: speakerId2})
-	    );
-	});
-	});
-
-};
-*/

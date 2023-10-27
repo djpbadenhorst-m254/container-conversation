@@ -10,4 +10,4 @@ COPY knexfile.js /
 RUN npm install
 
 # RUN SERVER
-CMD npx knex migrate:up && npm run server
+CMD (npm run knex -- migrate:latest && npm run server)

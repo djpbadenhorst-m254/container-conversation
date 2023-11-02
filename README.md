@@ -27,7 +27,7 @@ docker push gcr.io/m254-registry-f3e3/conversation:$REPO_VERSION
 To deploy a new image in staging, run the following:
 
 ```
-#gcloud --project=m254-maverick-stg-infras-c7fa run services update m254-maverick-stg-conversation --region=europe-west1 --image=gcr.io/m254-registry-f3e3/conversation:$REPO_VERSION
+gcloud --project=m254-maverick-stg-infras-c7fa run services update m254-maverick-stg-conversation --region=europe-west1 --image=gcr.io/m254-registry-f3e3/conversation:$REPO_VERSION
 ```
 
 ### DEPLOY IN PRODUCTION

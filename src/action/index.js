@@ -1,6 +1,7 @@
 const { pocBotConfig, jsonLogic } = require('../config');
 const clients = require('../clients');
 const nunjucks = require('nunjucks');
+const flat = require('flat');
 const _ = require('lodash');
 
 const determineAction = async ({speakerId, prevCode, incMessage}) => {
@@ -11,16 +12,16 @@ const determineAction = async ({speakerId, prevCode, incMessage}) => {
     new Error('Too many config options found');
   subConfig = subConfig[0];
 
-  let action = subConfig.responses.filter(x=>{
+  let response = subConfig.responses.filter(x=>{
     return jsonLogic.apply(x.check, {incMessage: incMessage});
   })[0];
-  
+
   // Update speaker data
   let speakerData = (await clients.getSpeakerData(speakerId)) || {};
-  if (action.store !== undefined) {
+  if (response.store !== undefined) {
     speakerData = {
       ...speakerData,
-      ..._.map(action.store, (value, key)=>
+      ..._.map(response.store, (value, key)=>
 	({[key]: jsonLogic.apply(value, {
 	  incMessage: incMessage,
 	  ...speakerData
@@ -29,20 +30,30 @@ const determineAction = async ({speakerId, prevCode, incMessage}) => {
     };
     await clients.updateSpeakerData(speakerId, speakerData);
   }
+  _.each(speakerData, (val,key)=>{
+    try { speakerData[key] = JSON.parse(speakerData[key]); } catch (err) {}
+  });
+  speakerData = _.mapKeys(flat.flatten(speakerData), (val, key)=>key.replaceAll('.','_'));
 
   // Determine outgoing message
-  let outMessage = pocBotConfig.filter(x=>(x.code==action.nextCode));
-  if (outMessage.length==0)
+  let nextAction = pocBotConfig.filter(x=>(x.code==response.nextCode));
+  if (nextAction.length==0)
     new Error('No config options found');
-  else if (outMessage.length>1)
+  else if (nextAction.length>1)
     new Error('Too many config options found');
-  outMessage = outMessage[0]?.outMessage;
-  if (outMessage)
+  let nextCode = nextAction[0]?.code;
+  let outChannel = nextAction[0]?.outChannel;
+  let outMessage = nextAction[0]?.outMessage;
+
+  if (outChannel=='SMS' && outMessage) 
     outMessage = nunjucks.renderString(outMessage, speakerData);
-  
+
+  if (outChannel=='WHATSAPP' && outMessage?.type=='text' && outMessage.text?.body)
+    outMessage.text.body = nunjucks.renderString(outMessage.text.body, speakerData);
+
   return {
-    nextCode: action.nextCode,
-    outChannel: 'SMS',
+    nextCode: nextCode,
+    outChannel: outChannel,
     outMessage: outMessage,
   };
 };

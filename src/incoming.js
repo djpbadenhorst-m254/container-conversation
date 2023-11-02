@@ -8,26 +8,34 @@ let process = async (data) => {
 
   // Select relevant conversation or create one
   let selConv;
-  if (data.message.toLowerCase()=='hi') {
+  if (data.message.toLowerCase().trim()=='hi') {
     if (conversations.length > 0) {
       await Promise.all(conversations.map(conv =>
 	clients.updateConversation(conv.id, {status:'closed'})
       ));
     }
-    await clients.createConversation(speaker.id);
+    await clients.createConversation(speaker.id).then(conv=>{
+      if (data.channel == 'WHATSAPP')
+	return clients.updateConversation(conv.id, {last_interaction_code:'WA_INIT'});
+      else
+	return conv;
+    });
     conversations = await clients.getConversationsBySpeakerId(speaker.id,['active']);
+    selConv = conversations[0];
   }
-  if (conversations===undefined || conversations.length==0)
-    return undefined;
-  selConv = conversations[0];
-  
+  else {
+    if (conversations===undefined || conversations.length==0)
+      return undefined;
+    selConv = conversations[0];
+  }
+
   // Log response
   clients.logResponse({
     timestamp: new Date(),
     speakerId: speaker.id,
     conversationId: selConv.id,
     conversationCode: selConv.last_interaction_code  ,
-    channel: 'SMS',
+    channel: data.channel,
     payload: {message: data.message},
   });
   
@@ -43,6 +51,15 @@ let process = async (data) => {
 	clients.updateConversation(selConv.id, {status:'closed'});
       await outgoing.sendSms({
 	from: '25412',
+	to: speaker.phone_number, 
+	message: action.outMessage,
+      });
+    }
+    else if (action.outChannel == 'WHATSAPP' && action.outMessage!==undefined) {
+      await clients.updateConversation(selConv.id, {last_interaction_code:action.nextCode});
+      if (action.nextCode=='CLOSED')
+	clients.updateConversation(selConv.id, {status:'closed'});
+      await outgoing.sendWhatsapp({
 	to: speaker.phone_number, 
 	message: action.outMessage,
       });

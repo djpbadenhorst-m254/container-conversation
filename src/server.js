@@ -20,6 +20,52 @@ app.post('/conversations/incoming/sms', (req, res) => {
     });
 });
 
+app.get('/conversations/incoming/whatsapp', async (req, res) => {
+  if (req.query['hub.mode'] == 'subscribe' && req.query['hub.verify_token'] == 'TOKEN') {
+    return res.send(req.query['hub.challenge']);
+  } else {
+    return res.sendStatus(400);
+  }
+});
+
+app.post('/conversations/incoming/whatsapp', async (req, res) => {
+  let body = req.body;
+  
+  await Promise.all(body.entry.map(entry=> {
+    if (entry?.changes) {
+      return Promise.all(entry?.changes.map(async change=>{
+	if (change.field == 'messages') {
+	  let payload = change.value;
+	  await (payload?.messages || []).forEach(
+	    async message => {
+	      try {
+		//console.log(JSON.stringify(message,null,2));
+		let timestamp = message.timestamp;
+		let data = {
+		    channel: 'WHATSAPP',
+		    phoneNumber: '+' + message.from,
+		  };
+
+		if (message.type=='text')
+		  data.message = message.text?.body;
+		else if (message.type=='interactive' && message.interactive?.type=='list_reply')
+		  data.message = message.interactive?.list_reply?.id;
+		else if (message.type=='interactive' && message.interactive?.type=='button_reply')
+		  data.message = message.interactive?.button_reply?.id;
+		
+		await incoming.process(data);
+	      } catch (error) {}
+	    }
+	  );
+	}
+      }));
+    }
+    else
+      return res.sendStatus(200);
+  }));
+  return res.sendStatus(200);
+});
+
 app.post('/conversations/outgoing/sms', (req, res) => {
   let data = {
     from: req.body.source,
@@ -34,11 +80,3 @@ app.post('/conversations/outgoing/sms', (req, res) => {
 app.listen(8888, () => {
   console.log('Server listening');
 });
-
-/*
-app.post('/conversations/incoming', (req, res) => {
-  return incoming(req.body)
-    .then(msg => res.end(JSON.stringify({message:'Succeeded'})))
-    .catch(err => res.end(JSON.stringify({message:'Failed', error: err})));
-})
-*/

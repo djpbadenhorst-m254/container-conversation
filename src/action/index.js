@@ -1,15 +1,15 @@
-const { pocBotConfig, jsonLogic } = require('../config');
+const { BOTCONFIG, jsonLogic } = require('../config');
 const clients = require('../clients');
 const nunjucks = require('nunjucks');
 const flat = require('flat');
 const _ = require('lodash');
 
-const determineAction = async ({speakerId, prevCode, incMessage}) => {
-  let subConfig = pocBotConfig.filter(x=>(x.code==prevCode));
+const determineAction = async ({speakerId, prevCode, incMessage, incChannel}) => {
+  let subConfig = BOTCONFIG.filter(x=>(x.code==prevCode && x.incChannel==incChannel));
   if (subConfig.length==0)
-    new Error('No config options found');
+    throw new Error('No config options found');
   else if (subConfig.length>1)
-    new Error('Too many config options found');
+    throw new Error('Too many config options found');
   subConfig = subConfig[0];
 
   let response = subConfig.responses.filter(x=>{
@@ -36,11 +36,12 @@ const determineAction = async ({speakerId, prevCode, incMessage}) => {
   speakerData = _.mapKeys(flat.flatten(speakerData), (val, key)=>key.replaceAll('.','_'));
 
   // Determine outgoing message
-  let nextAction = pocBotConfig.filter(x=>(x.code==response.nextCode));
+  let nextAction = BOTCONFIG.filter(x=>x.code==response.nextCode);
   if (nextAction.length==0)
-    new Error('No config options found');
+    throw new Error('No response code found');
   else if (nextAction.length>1)
-    new Error('Too many config options found');
+    throw new Error('Too many response code found');
+  
   let nextCode = nextAction[0]?.code;
   let outChannel = nextAction[0]?.outChannel;
   let outMessage = nextAction[0]?.outMessage;

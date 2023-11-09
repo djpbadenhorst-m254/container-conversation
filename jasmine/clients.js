@@ -116,6 +116,7 @@ const test_05 = async () => {
     let speaker = await db('speakers').where('phone_number','def');
     await db('responses').where('speaker_id',speaker[0].id).del();
     await db('conversations').where('speaker_id',speaker[0].id).del();
+    await db('speaker_data').where('speaker_id', speaker[0].id).del();
     await db('speakers').where('id',speaker[0].id).del();
   }
 };
@@ -129,9 +130,9 @@ describe('clients', function() {
     clients.setKnex();
   });
 
-  //it('test_01: Test getSpeaker', test_01);
-  //it('test_02: Test getSpeakerConversations', test_02);
-  //it('test_03: Test updateConversation', test_03);
+  it('test_01: Test getSpeaker', test_01);
+  it('test_02: Test getSpeakerConversations', test_02);
+  it('test_03: Test updateConversation', test_03);
   it('test_04: Test updateSpeakerData', test_04);
-  //it('test_05: Test logResponse', test_05);
+  it('test_05: Test logResponse', test_05);
 });

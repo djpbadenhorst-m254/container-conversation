@@ -5,6 +5,7 @@ This repository contains code for the conversation server.
 In order to build the conversation server docker image , simply run the following script:
 
 ```
+git clone git@github.com:moneyafrica/nodelib-m254-utils.git
 bash build.sh
 ```
 

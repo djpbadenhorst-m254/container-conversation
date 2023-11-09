@@ -17,8 +17,7 @@
     "mysql2": "^3.6.1",
     "node-fetch": "^3.3.2",
     "nunjucks": "^3.2.4",
-    "sync-fetch": "^0.5.2",
-    "xmlhttprequest": "^1.8.0"
+    "sync-fetch": "^0.5.2"
   },
   "devDependencies": {
     "jasmine": "^5.1.0"

@@ -1,5 +1,5 @@
 const test_01 = async () => {
-  console.log('here')
+  //console.log('here')
 };
 
 describe('scratch', function() {  

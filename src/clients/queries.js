@@ -68,7 +68,9 @@ const updateConversation = (conversationId, data) => {
   let db = getKnex();
   return db('conversations')
     .update(data)
-    .where({id: conversationId});
+    .where({id: conversationId})
+    .then(x=>db('conversations').where({id: conversationId}))
+    .then(x=>x[0]);
 };
 const getSpeakerData = (speakerId) => {
   let db = getKnex();

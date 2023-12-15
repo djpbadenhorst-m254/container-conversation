@@ -44,3 +44,18 @@ To run the unit test, run the following.
 ```
 npm run tests
 ```
+
+# TODO
+Usefull API calls
+```
+curl -H 'Content-Type: application/json' -X POST 'https://m254-maverick-prd-conversation-rroh4i7zwa-ew.a.run.app/conversations/finqual' -d '{ "phone_number":"+27734699556", "first_name":"Dirk", "product_category":"Secured Business Loan", "entrypoint": "Facebook" }'
+
+Entry Point: Website
+Campaign:
+Name: Adam Versprille
+Product: Logbook Loan
+Loan Amount: 100,000
+Vehicle Make / Model (String): Toyota (could be junk)
+Consent Given: Yes
+Initiating Channel: Whatsapp, if Whatsapp fails to deliver, SMS
+```

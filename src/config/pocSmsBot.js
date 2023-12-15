@@ -8,8 +8,17 @@ let pocSmsBot = [
     ]
   }, // INIT
   {
+    code: 'INIT_RETURN',
+    incChannel: 'SMS',
+    responses: [
+      { nextCode:'SMS/INTRO1_RETURN', check: { '==': [{'lower': {'trim': {'var': 'incMessage'}}}, 'hi'] }},
+      { nextCode:'CLOSED', check: true },
+    ]
+  }, // INIT_RETURN
+  {
     code: 'SMS/INTRO1_PRE',
     incChannel: 'SMS',
+    outChannel: 'SMS',
     outMessage: `Hello! Thank you for messaging Money254. ` +
       `We are Kenya’s premier loan comparison platform!\n` + 
       `Our search is better on WhatsApp. ` +
@@ -128,7 +137,7 @@ let pocSmsBot = [
     code: 'SMS/LBL1',
     incChannel: 'SMS',
     outChannel: 'SMS',
-    outMessage: `Thanks, {{ first_name }}. We can help you compare your logbook loan ` +
+    outMessage: `Thanks, {first_name}. We can help you compare your logbook loan ` +
       `options over our chat. First, how much financing are you looking for?`,
     responses: [
       { nextCode:'SMS/LBL2', check: { "and": [
@@ -191,7 +200,7 @@ let pocSmsBot = [
     code: 'SMS/LBL2',
     incChannel: 'SMS',
     outChannel: 'SMS',
-    outMessage:`Okay, we'll search for Ksh{{ inital_loan_amount }}. ` +
+    outMessage:`Okay, we'll search for Ksh{inital_loan_amount}. ` +
       `We now have some questions to identify which loans you qualify for. ` +
       `First, what type of vehicle do you own?\n` + 
       `Please reply with a number representing your answer.\n` +
@@ -417,11 +426,11 @@ let pocSmsBot = [
   {
     code: 'SMS/LBL_RESULTS_PASS',
     outChannel: 'SMS',
-    outMessage:`Congratulations {{ first_name }}, we've found` +
-      `{{ logbook_loan_options_num_loans }} different logbook loans you may qualify for!\n\n` +
+    outMessage:`Congratulations {first_name}, we've found` +
+      `{logbook_loan_options_num_loans} different logbook loans you may qualify for!\n\n` +
       `Your Results:\n` + 
-      `* Options available from {{ logbook_loan_options_num_loans }} Lenders\n` + 
-      `* Starting monthly payment from Ksh{{ logbook_loan_options_min_loan_payment }}\n\n` + 
+      `* Options available from {logbook_loan_options_num_loans} Lenders\n` + 
+      `* Starting monthly payment from Ksh{logbook_loan_options_min_loan_payment}\n\n` + 
       `A Money254 agent will call you shortly from number 0746514628 to guide you ` +
       `through a tailored comparison of these loan options. ` +
       `You can browse options while you wait here: money254.info/logbook`,
@@ -433,7 +442,7 @@ let pocSmsBot = [
     code: 'SMS/INTRO1_RETURN',
     incChannel: 'SMS',
     outChannel: 'SMS',
-    outMessage: `Welcome back {{ first_name }}. What type of loan can we help you ` +
+    outMessage: `Welcome back {first_name}. What type of loan can we help you ` +
       `search for today?\n` +
       `1 - Logbook Loan\n` + 
       `2 - Business Unsecured Working Capital Loan\n` + 

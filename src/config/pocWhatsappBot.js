@@ -7,9 +7,19 @@ let pocWhatsappBot = [
     ]
   }, // INIT
   {
+    code: 'INIT_RETURN',
+    incChannel: 'WHATSAPP',
+    responses: [
+      { nextCode:'WAP/INTRO1_RETURN', check: true },
+    ]
+  }, // INIT
+  {
     code: 'WAP/INTRO1',
     incChannel: 'WHATSAPP',
     outChannel: 'WHATSAPP',
+    delayedMessage: [
+      { nextCode:'WAP/INTRO1_RETURN', check: true },
+    ],
     outMessage: {
       type: "interactive",
       interactive:{
@@ -104,21 +114,21 @@ let pocWhatsappBot = [
   }, // WAP/INTRO1_E1
   {
     code: 'WAP/UWC_REDIRECT',
-    outChannel: 'CLOSED',
+    outChannel: 'WHATSAPP',
     outMessage: {
-      "type": "interactive",
-      "interactive": {
-	"type": "cta_url",
-	"body": {
-	  "text": `We are currently working on adding Unsecured Business Working Capital ` +
+      type: "interactive",
+      interactive: {
+	type: "cta_url",
+	body: {
+	  text: `We are currently working on adding Unsecured Business Working Capital ` +
 	    `Loans to our chatbot. You can search for them on our website www.money254.co.ke` +
 	    `in the meantime by clicking on the link below.`
 	},
-	"action": {
-	  "name": "cta_url",
-	  "parameters": {
-            "display_text": "Search via Website",
-            "url": "https://www.money254.co.ke/loans/business-loans/business-loans-home?utm_source=whatsapp&utm_medium=message&utm_campaign=searchbot"
+	action: {
+	  name: "cta_url",
+	  parameters: {
+            display_text: "Search via Website",
+            url: "https://www.money254.co.ke/loans/business-loans/business-loans-home?utm_source=whatsapp&utm_medium=message&utm_campaign=searchbot"
 	  }
 	}
       }
@@ -131,19 +141,19 @@ let pocWhatsappBot = [
     code: 'WAP/PL_REDIRECT',
     outChannel: 'WHATSAPP',
     outMessage: {
-      "type": "interactive",
-      "interactive": {
-	"type": "cta_url",
-	"body": {
-	  "text": `We are currently working on adding Unsecured Business Working Capital ` +
+      type: "interactive",
+      interactive: {
+	type: "cta_url",
+	body: {
+	  text: `We are currently working on adding Unsecured Business Working Capital ` +
 	    `Loans to our chatbot. You can search for them on our website ` +
 	    `www.money254.co.ke in the meantime by clicking on the link below.`
 	},
-	"action": {
-	  "name": "cta_url",
-	  "parameters": {
-            "display_text": "Search via Website",
-            "url": "https://www.money254.co.ke/loans/personal-loans/personal-loans-home?utm_source=whatsapp&utm_medium=message&utm_campaign=searchbot"
+	action: {
+	  name: "cta_url",
+	  parameters: {
+            display_text: "Search via Website",
+            url: "https://www.money254.co.ke/loans/personal-loans/personal-loans-home?utm_source=whatsapp&utm_medium=message&utm_campaign=searchbot"
 	  }
 	}
       }
@@ -156,19 +166,19 @@ let pocWhatsappBot = [
     code: 'WAP/OL_REDIRECT',
     outChannel: 'WHATSAPP',
     outMessage: {
-      "type": "interactive",
-      "interactive": {
-	"type": "cta_url",
-	"body": {
-	  "text": `We are currently working on adding other loan types to our chatbot. ` +
+      type: "interactive",
+      interactive: {
+	type: "cta_url",
+	body: {
+	  text: `We are currently working on adding other loan types to our chatbot. ` +
 	    `You can search across all 250 of the loans in our network on our website ` +
 	    `in the meantime: www.money254.co.ke`
 	},
-	"action": {
-	  "name": "cta_url",
-	  "parameters": {
-            "display_text": "Go to Website",
-            "url": "https://www.money254.co.ke/loans/personal-loans/personal-loans-home?utm_source=whatsapp&utm_medium=message&utm_campaign=searchbot"
+	action: {
+	  name: "cta_url",
+	  parameters: {
+            display_text: "Go to Website",
+            url: "https://www.money254.co.ke/loans/personal-loans/personal-loans-home?utm_source=whatsapp&utm_medium=message&utm_campaign=searchbot"
 	  }
 	}
       }
@@ -202,7 +212,7 @@ let pocWhatsappBot = [
     outMessage: {
       type: "text",
       text: {
-	body:`Thanks, {{ first_name }}. We can help you compare your logbook loan options over our chat. First, how much financing are you looking for?`
+	body:`Thanks, {first_name}. We can help you compare your logbook loan options over our chat. First, how much financing are you looking for?`
       }
     },
     responses: [
@@ -281,7 +291,7 @@ let pocWhatsappBot = [
       interactive:{
 	type: "list",
 	body: {
-	  text: `Okay, we'll search for Ksh{{ inital_loan_amount }}. We now have some questions to identify which loans you qualify for. First, what type of vehicle do you own?`
+	  text: `Okay, we'll search for Ksh{inital_loan_amount}. We now have some questions to identify which loans you qualify for. First, what type of vehicle do you own?`
 	},
 	action: {
 	  button: "Select an option",
@@ -293,7 +303,7 @@ let pocWhatsappBot = [
 		{ id:"2", title: "Commercial Truck" },
 		{ id:"3", title: "PSV or Uber" },
 		{ id:"4", title: "Boda Boda or Tuk Tuk" },
-		{ id:"5", title: "I do not currently own a Vehicle" },
+		{ id:"5", title: "I do not own a Vehicle" },
               ]
 	    },
 	  ]
@@ -347,7 +357,7 @@ let pocWhatsappBot = [
 		{ id:"2", title: "Commercial Truck" },
 		{ id:"3", title: "PSV or Uber" },
 		{ id:"4", title: "Boda Boda or Tuk Tuk" },
-		{ id:"5", title: "I do not currently own a Vehicle" },
+		{ id:"5", title: "I do not own a Vehicle" },
               ]
 	    },
 	  ]
@@ -380,20 +390,19 @@ let pocWhatsappBot = [
   }, // WAP/LBL_E1
   {
     code: 'WAP/LBL2_DNQ1',
-    incChannel: 'WHATSAPP',
     outChannel: 'WHATSAPP',
     outMessage: {
-      "type": "interactive",
-      "interactive": {
-	"type": "cta_url",
-	"body": {
-	  "text": `Unfortunately you need to own a vehicle to qualify for a logbook loan. You can browse other loan types on our website here:`
+      type: "interactive",
+      interactive: {
+	type: "cta_url",
+	body: {
+	  text: `Unfortunately you need to own a vehicle to qualify for a logbook loan. You can browse other loan types on our website here:`
 	},
-	"action": {
-	  "name": "cta_url",
-	  "parameters": {
-            "display_text": "Money254",
-            "url": "https://money254.info/allloans"
+	action: {
+	  name: "cta_url",
+	  parameters: {
+            display_text: "Money254",
+            url: "https://money254.info/allloans"
 	  }
 	}
       }
@@ -404,20 +413,19 @@ let pocWhatsappBot = [
   }, // WAP/LBL2_DNQ1
   {
     code: 'WAP/LBL2_DNQ2',
-    incChannel: 'WHATSAPP',
     outChannel: 'WHATSAPP',
     outMessage: {
-      "type": "interactive",
-      "interactive": {
-	"type": "cta_url",
-	"body": {
-	  "text": `Unfortunately we currently only offer logbook loans for motor four wheeled vehicles. You can browse other loan types on our website here:`
+      type: "interactive",
+      interactive: {
+	type: "cta_url",
+	body: {
+	  text: `Unfortunately we currently only offer logbook loans for motor four wheeled vehicles. You can browse other loan types on our website here:`
 	},
-	"action": {
-	  "name": "cta_url",
-	  "parameters": {
-            "display_text": "Money254",
-            "url": "https://money254.info/allloans"
+	action: {
+	  name: "cta_url",
+	  parameters: {
+            display_text: "Money254",
+            url: "https://money254.info/allloans"
 	  }
 	}
       }
@@ -431,42 +439,10 @@ let pocWhatsappBot = [
     incChannel: 'WHATSAPP',
     outChannel: 'WHATSAPP',
     outMessage: {
-      type: "interactive",
-      interactive:{
-	type: "list",
-	body: {
-	  text: `What is the Year of Manufacture of the Vehicle?`
-	},
-	action: {
-	  button: "Select an option",
-	  sections:[
-	    {
-              title:"Available options",
-              rows: [
-		{ id:"2023", title: "2023" },
-		{ id:"2022", title: "2022" },
-		{ id:"2021", title: "2021" },
-		{ id:"2020", title: "2020" },
-		{ id:"2019", title: "2019" },
-		{ id:"2018", title: "2018" },
-		{ id:"2017", title: "2017" },
-		{ id:"2016", title: "2016" },
-		{ id:"2015", title: "2015" },
-		{ id:"2014", title: "2014" },
-		{ id:"2012", title: "2012" },
-		{ id:"2011", title: "2011" },
-		{ id:"2010", title: "201" },
-		{ id:"2009", title: "2009" },
-		{ id:"2008", title: "2008" },
-		{ id:"2007", title: "2007" },
-		{ id:"2006", title: "2006" },
-		{ id:"2005", title: "2005" },
-		{ id:"Older than 2005", title: "2004" },
-              ]
-	    },
-	  ]
-	}
-      } 
+      type: "text",
+      text: {
+	body:`What is the Year of Manufacture of the Vehicle?`
+      }
     },
     responses: [
       { nextCode:'WAP/LBL4', check: {'and': [
@@ -482,44 +458,10 @@ let pocWhatsappBot = [
     incChannel: 'WHATSAPP',
     outChannel: 'WHATSAPP',
     outMessage: {
-      type: "interactive",
-      interactive:{
-	type: "list",
-	body: {
-	  text: `We're sorry, we don't understand your response. ` +
-	    `Please click on the list below and then click on the option ` +
-	    `you would like to search for.`
-	},
-	action: {
-	  button: "Select an option",
-	  sections:[
-	    {
-              title:"Available options",
-              rows: [
-		{ id:"2023", title: "2023" },
-		{ id:"2022", title: "2022" },
-		{ id:"2021", title: "2021" },
-		{ id:"2020", title: "2020" },
-		{ id:"2019", title: "2019" },
-		{ id:"2018", title: "2018" },
-		{ id:"2017", title: "2017" },
-		{ id:"2016", title: "2016" },
-		{ id:"2015", title: "2015" },
-		{ id:"2014", title: "2014" },
-		{ id:"2012", title: "2012" },
-		{ id:"2011", title: "2011" },
-		{ id:"2010", title: "201" },
-		{ id:"2009", title: "2009" },
-		{ id:"2008", title: "2008" },
-		{ id:"2007", title: "2007" },
-		{ id:"2006", title: "2006" },
-		{ id:"2005", title: "2005" },
-		{ id:"Older than 2005", title: "Older than 2005" },
-              ]
-	    },
-	  ]
-	}
-      } 
+      type: "text",
+      text: {
+	body:`This response is invalid. Please enter a valid Year of Manufacture in YYYY format. (i.e. 2020). Enter 0 to go back to the start.`
+      }
     },
     responses: [
       { nextCode:'WAP/LBL4', check: {'and': [
@@ -532,6 +474,7 @@ let pocWhatsappBot = [
   }, // WAP/LBL3_E1
   {
     code: 'WAP/LBL4',
+    incChannel: 'WHATSAPP',
     outChannel: 'WHATSAPP',
     outMessage: {
       type: "text",
@@ -566,6 +509,7 @@ let pocWhatsappBot = [
   }, // WAP/LBL4
   {
     code: 'WAP/LBL4_E1',
+    incChannel: 'WHATSAPP',
     outChannel: 'WHATSAPP',
     outMessage: {
       type: "text",
@@ -600,6 +544,7 @@ let pocWhatsappBot = [
   }, // WAP/LBL4_E1
   {
     code: 'WAP/LBL4_E2',
+    incChannel: 'WHATSAPP',
     outChannel: 'WHATSAPP',
     outMessage: {
       type: "text",
@@ -643,10 +588,10 @@ let pocWhatsappBot = [
     outMessage: {
       type: "text",
       text: {
-	body:`Congratulations {{ first_name }}, we've found {{ logbook_loan_options_num_loans }} different logbook loans you may qualify for!\n\n` +
+	body:`Congratulations {first_name}, we've found {logbook_loan_options_num_loans} different logbook loans you may qualify for!\n\n` +
 	  `Your Results:\n` + 
-	  `* Options available from {{ logbook_loan_options_num_loans }} Lenders\n` + 
-	  `* Starting monthly payment from Ksh{{ logbook_loan_options_min_loan_payment }}\n\n` + 
+	  `* Options available from {logbook_loan_options_num_loans} Lenders\n` + 
+	  `* Starting monthly payment from Ksh{logbook_loan_options_min_loan_payment}\n\n` + 
 	  `A Money254 agent will call you shortly from number 0746514628 to guide you through a tailored comparison of these loan options. ` +
 	  `You can browse options while you wait here: money254.info/logbook`
       }
@@ -655,7 +600,6 @@ let pocWhatsappBot = [
       { nextCode:'CLOSED', check: true},
     ]
   }, // WAP/LBL_RESULTS_PASS
-  
   {
     code: 'WAP/INTRO1_RETURN',
     incChannel: 'WHATSAPP',
@@ -665,7 +609,7 @@ let pocWhatsappBot = [
       interactive:{
 	type: "list",
 	body: {
-	  text: `Welcome back {{ first_name }}. What type of loan can we help you search for today?`
+	  text: `Welcome back {first_name}. What type of loan can we help you search for today?`
 	},
 	action: {
 	  button: "Select an option",
@@ -712,7 +656,7 @@ let pocWhatsappBot = [
       interactive:{
 	type: "list",
 	body: {
-	  text: `Okay {{ first_name }}, lets look for a different type of loan. What type of loan would you like to search for?\n`
+	  text: `Okay {first_name}, lets look for a different type of loan. What type of loan would you like to search for?\n`
 	},
 	action: {
 	  button: "Select an option",
@@ -756,34 +700,3 @@ module.exports={
   pocWhatsappBot: pocWhatsappBot,
 };
 
-
-let TEST = {
-  code: 'POC4',
-  outChannel: 'WHATSAPP',
-  outMessage:{
-    type: "interactive",
-    interactive: {
-      type: "button",
-      body: {
-	text: `Okay, we will look search for {{initial_loan_amount}}. We now have some questions to identify which loans you qualify for. ` +
-	  `First, what type of vehicle do you own?\n` +
-	  `Please reply with a number representing your answer.\n`
-      },
-      action: {
-	buttons: [
-          {
-            type: "reply",
-            reply: { id: "1", title: "PrivCar/Truck/SUV" }
-          },
-          {
-            type: "reply",
-            reply: { id: "2", title: "Commercial Truck" }
-          },
-	]
-      }
-    }
-  },
-  responses: [
-    { nextCode:'TEST', check: true},
-  ]
-};

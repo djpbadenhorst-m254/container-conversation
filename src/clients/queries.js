@@ -5,12 +5,16 @@ const getSpeaker = ({
   speakerId,
   whatsappUserId, facebookUserId,
   lgpLeadId, appUserId,
-  phoneNumber, email
+  phoneNumber, email, webUserId
 }) => {
   let db = getKnex();
   let query = {};
   if (speakerId) {
     query = {speaker_id: speakerId};
+  } else if (phoneNumber) {
+    query = {phone_number: phoneNumber};
+  } else if (email) {
+    query = {email: email};
   } else if (appUserId) {
     query = {app_user_id: appUserId};
   } else if (lgpLeadId) {
@@ -19,8 +23,8 @@ const getSpeaker = ({
     query = {whatsapp_user_id: whatsappUserId};
   } else if (facebookUserId) {
     query = {facebook_user_id: facebookUserId};
-  } else if (phoneNumber) {
-    query = {phone_number: phoneNumber};
+  } else if (webUserId) {
+    query = {web_user_id: webUserId};
   } else {
     throw new Error('Insuficient Ids');
   }
@@ -43,22 +47,20 @@ const getSpeaker = ({
 const createConversation = (speakerId) => {
   let db = getKnex();
   if (speakerId) {
-    let data = {speaker_id: speakerId, status: 'active', last_interaction_code: 'INIT'};
+    let data = {speaker_id: speakerId, status: 'active'};//, last_interaction_code: 'INIT'
     return db('conversations').insert([data])
       .then(x=>db('conversations').where(data).first());
   } else {
     throw new Error('No Speaker Id');
   }
 };
-const getConversationsBySpeakerId = (speakerId, allowedStatus=[]) => {
+const getConversationsBySpeakerId = async (speakerId, allowedStatus=[]) => {
   let db = getKnex();
   if (speakerId) {
     let data = {speaker_id: speakerId};
     let result = db('conversations').where(data);
-
     if (allowedStatus.length!=0)
       result = result.whereIn('status',allowedStatus);
-    
     return result.orderBy('ts_created', 'desc');
   } else {
     throw new Error('No Speaker Id');
@@ -71,6 +73,36 @@ const updateConversation = (conversationId, data) => {
     .where({id: conversationId})
     .then(x=>db('conversations').where({id: conversationId}))
     .then(x=>x[0]);
+};
+const getIncoming = (channelId) => {
+  let db = getKnex();
+  return db('incoming').where({channel_id:channelId}).select('*');
+};
+const logIncoming = (data) => {
+  data = {
+    ts: data.timestamp,
+    conversation_id: data.conversationId,
+    channel: data.channel,
+    channel_id: data.channelId,
+    status: data.status,
+    payload: data.payload,
+    conversation_code: data.conversationCode,
+  };
+  let db = getKnex();
+  return db('incoming').insert([data]);
+};
+const logOutgoing = (data) => {
+  data = {
+    ts: data.timestamp,
+    conversation_id: data.conversationId,
+    channel: data.channel,
+    channel_id: data.channelId,
+    status: data.status,
+    payload: data.payload,
+    conversation_code: data.conversationCode,
+  };
+  let db = getKnex();
+  return db('outgoing').insert([data]);
 };
 const getSpeakerData = (speakerId) => {
   let db = getKnex();
@@ -88,16 +120,24 @@ const updateSpeakerData = (speakerId, data={}) => {
       return db('speaker_data').insert([{speaker_id: speakerId, speaker_data:data}]);
   });
 };
-const logResponse = (data) => {
-  data = {
-    ts: data.timestamp,
-    speaker_id: data.speakerId,
-    conversation_id: data.conversationId,
-    channel: data.channel,
-    payload: data.payload,
-  };
+const clearSpeakerData = (speakerId) => {
   let db = getKnex();
-  return db('responses').insert([data]);
+  return getSpeakerData(speakerId).then(speakerData=>{
+    if (speakerData) {
+      return db('speaker_data')
+        .update({speaker_data: JSON.stringify({phone_number: speakerData['phone_number']})})
+        .where({speaker_id: speakerId});
+    } else
+      return undefined;
+  });
+};
+const updateOutgoing = (channelId, data) => {
+  let db = getKnex();
+  return db('outgoing')
+    .update(data)
+    .where({channel_id: channelId})
+    .then(x=>db('outgoing').where({channel_id: channelId}))
+    .then(x=>x[0]);
 };
 
 module.exports={
@@ -105,7 +145,11 @@ module.exports={
   createConversation: createConversation,
   getConversationsBySpeakerId: getConversationsBySpeakerId,
   updateConversation: updateConversation,
+  getIncoming: getIncoming,
+  logIncoming: logIncoming,
+  logOutgoing: logOutgoing,
   getSpeakerData: getSpeakerData,
   updateSpeakerData: updateSpeakerData,
-  logResponse: logResponse,
+  clearSpeakerData: clearSpeakerData,
+  updateOutgoing: updateOutgoing,
 };

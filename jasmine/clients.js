@@ -46,9 +46,14 @@ const test_03 = async () => {
     let initConv = await clients.getConversationsBySpeakerId(speaker.id);
     expect(initConv[0].status).toEqual('active');
     
-    await clients.updateConversation(initConv[0].id, {status:'dormant'});
+    await clients.updateConversation(initConv[0].id, {
+      status:'dormant',
+      latest_outgoing_ts: new Date(), 
+      latest_outgoing_code: 'SOME_CODE',
+    });
     let updConv = await clients.getConversationsBySpeakerId(speaker.id);
     expect(updConv[0].status).toEqual('dormant');
+    expect(updConv[0].latest_outgoing_code).toEqual('SOME_CODE');
     
     let allConv = await clients.getConversationsBySpeakerId(speaker.id);
     expect(allConv.length).toEqual(1);
@@ -67,6 +72,90 @@ const test_03 = async () => {
   }
 };
 const test_04 = async () => {
+  try {
+    let speaker = await clients.getSpeaker({phoneNumber:'321'});
+    await clients.createConversation(speaker.id);
+    let conversation1 = await clients.getConversationsBySpeakerId(speaker.id);
+
+    await clients.logOutgoing({
+      timestamp: new Date(),
+      conversationId: conversation1[0].id,
+      channel: 'SMS',
+      channelId: '123',
+      status: 'sent',
+      payload: {message: 'some_message'},
+      conversationCode: 'X1',
+    });
+    
+    await clients.logOutgoing({
+      timestamp: new Date(),
+      conversationId: conversation1[0].id,
+      channel: 'SMS',
+      channelId: '123',
+      status: 'sent',
+      payload: {message: 'some_message'},
+      conversationCode: 'X2',
+    });
+
+    let db = clients.getKnex();
+    let outgoing = await db('outgoing').where('conversation_id',conversation1[0].id);
+    expect(outgoing.length).toEqual(2);
+  } catch (error) {
+    console.log(error);
+  } finally {
+    let db = clients.getKnex();
+    let speaker = await db('speakers').where('phone_number','321');
+    let conversation = await db('conversations').where('speaker_id',speaker[0].id);
+    await db('incoming').where('conversation_id',conversation[0].id).del();
+    await db('outgoing').where('conversation_id',conversation[0].id).del();
+    await db('conversations').where('speaker_id',speaker[0].id).del();
+    await db('speaker_data').where('speaker_id', speaker[0].id).del();
+    await db('speakers').where('id',speaker[0].id).del();
+  }
+};
+const test_05 = async () => {
+  try {
+    let speaker = await clients.getSpeaker({phoneNumber:'321'});
+    await clients.createConversation(speaker.id);
+    let conversation1 = await clients.getConversationsBySpeakerId(speaker.id);
+
+    await clients.logIncoming({
+      timestamp: new Date(),
+      conversationId: conversation1[0].id,
+      channel: 'SMS',
+      channelId: '123',
+      status: 'sent',
+      payload: {message: 'some_message'},
+      conversationCode: 'X1',
+    });
+
+    await clients.logIncoming({
+      timestamp: new Date(),
+      conversationId: conversation1[0].id,
+      channel: 'SMS',
+      channelId: '123',
+      status: 'sent',
+      payload: {message: 'some_message'},
+      conversationCode: 'X2',
+    });
+
+    let db = clients.getKnex();
+    let incoming = await db('incoming').where('conversation_id',conversation1[0].id);
+    expect(incoming.length).toEqual(2);
+  } catch (error) {
+    console.log(error);
+  } finally {
+    let db = clients.getKnex();
+    let speaker = await db('speakers').where('phone_number','321');
+    let conversation = await db('conversations').where('speaker_id',speaker[0].id);
+    await db('incoming').where('conversation_id',conversation[0].id).del();
+    await db('outgoing').where('conversation_id',conversation[0].id).del();
+    await db('conversations').where('speaker_id',speaker[0].id).del();
+    await db('speaker_data').where('speaker_id', speaker[0].id).del();
+    await db('speakers').where('id',speaker[0].id).del();
+  }
+};
+const test_06 = async () => {
   try {
     let speaker = await clients.getSpeaker({phoneNumber:'abc'});
     
@@ -91,30 +180,34 @@ const test_04 = async () => {
     await db('speakers').where('id',speaker[0].id).del();
   }
 };
-const test_05 = async () => {
+const test_07 = async () => {
   try {
-    let speaker = await clients.getSpeaker({phoneNumber:'def'});
+    let speaker = await clients.getSpeaker({phoneNumber:'321'});
     await clients.createConversation(speaker.id);
-    let conv = await clients.getConversationsBySpeakerId(speaker.id);
-    
-    await clients.logResponse({
+    let conversation1 = await clients.getConversationsBySpeakerId(speaker.id);
+
+    await clients.logOutgoing({
       timestamp: new Date(),
-      speakerId: speaker.id,
-      conversationId: conv[0].id,
-      conversion_code: conv[0].last_interaction_code,
+      conversationId: conversation1[0].id,
       channel: 'SMS',
+      channelId: '123',
+      status: 'sent',
       payload: {message: 'some_message'},
+      conversationCode: 'X1',
     });
+    await clients.updateOutgoing('123',{status:'read'});
     
     let db = clients.getKnex();
-    let log = await db('responses').where('speaker_id',speaker.id);
-    expect(log.length).toEqual(1);
+    let outgoing = await db('outgoing').where('conversation_id',conversation1[0].id);
+    expect(outgoing[0].status).toEqual('read');
   } catch (error) {
     console.log(error);
   } finally {
     let db = clients.getKnex();
-    let speaker = await db('speakers').where('phone_number','def');
-    await db('responses').where('speaker_id',speaker[0].id).del();
+    let speaker = await db('speakers').where('phone_number','321');
+    let conversation = await db('conversations').where('speaker_id',speaker[0].id);
+    await db('incoming').where('conversation_id',conversation[0].id).del();
+    await db('outgoing').where('conversation_id',conversation[0].id).del();
     await db('conversations').where('speaker_id',speaker[0].id).del();
     await db('speaker_data').where('speaker_id', speaker[0].id).del();
     await db('speakers').where('id',speaker[0].id).del();
@@ -131,8 +224,10 @@ describe('clients', function() {
   });
 
   it('test_01: Test getSpeaker', test_01);
-  it('test_02: Test getSpeakerConversations', test_02);
+  it('test_02: Test getConversationsBySpeakerId', test_02);
   it('test_03: Test updateConversation', test_03);
-  it('test_04: Test updateSpeakerData', test_04);
-  it('test_05: Test logResponse', test_05);
+  it('test_04: Test outgoing', test_04);
+  it('test_05: Test incoming', test_05);
+  it('test_06: Test updateSpeakerData', test_06);
+  it('test_07: Test updateOutgoing', test_07);
 });

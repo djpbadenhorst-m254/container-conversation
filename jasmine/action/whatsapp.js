@@ -478,10 +478,12 @@ const test_12 = async () => {
       last_name: 'Smith',
       initial_loan_amount:100000
     });
+    console.log('a');
     action = await determineAction({
       speakerId: speaker.id,
       prevCode: 'WAP/LBL4',
       incMessage: 'something',
+      incChannel: 'WHATSAPP',
     });
     expect(action.nextCode).toEqual('WAP/LBL4_E2');
 
@@ -489,6 +491,7 @@ const test_12 = async () => {
       speakerId: speaker.id,
       prevCode: 'WAP/LBL4',
       incMessage: '99999',
+      incChannel: 'WHATSAPP',
     });
     expect(action.nextCode).toEqual('WAP/LBL4_E1');
 
@@ -496,6 +499,7 @@ const test_12 = async () => {
       speakerId: speaker.id,
       prevCode: 'WAP/LBL4',
       incMessage: '150000',
+      incChannel: 'WHATSAPP',
     });
     expect(action.nextCode).toEqual('WAP/LBL_RESULTS_PASS');
 
@@ -522,6 +526,7 @@ const test_13 = async () => {
       speakerId: speaker.id,
       prevCode: 'WAP/LBL4_E1',
       incMessage: 'something',
+      incChannel: 'WHATSAPP',
     });
     expect(action.nextCode).toEqual('WAP/LBL4_E2');
 
@@ -529,6 +534,7 @@ const test_13 = async () => {
       speakerId: speaker.id,
       prevCode: 'WAP/LBL4_E1',
       incMessage: '99999',
+      incChannel: 'WHATSAPP',
     });
     expect(action.nextCode).toEqual('WAP/LBL4_E1');
 
@@ -536,6 +542,7 @@ const test_13 = async () => {
       speakerId: speaker.id,
       prevCode: 'WAP/LBL4_E1',
       incMessage: '150000',
+      incChannel: 'WHATSAPP',
     });
     expect(action.nextCode).toEqual('WAP/LBL_RESULTS_PASS');
 
@@ -562,6 +569,7 @@ const test_14 = async () => {
       speakerId: speaker.id,
       prevCode: 'WAP/LBL4_E2',
       incMessage: 'something',
+      incChannel: 'WHATSAPP',
     });
     expect(action.nextCode).toEqual('WAP/LBL4_E2');
 
@@ -569,6 +577,7 @@ const test_14 = async () => {
       speakerId: speaker.id,
       prevCode: 'WAP/LBL4_E2',
       incMessage: '99999',
+      incChannel: 'WHATSAPP',
     });
     expect(action.nextCode).toEqual('WAP/LBL4_E1');
 
@@ -576,6 +585,7 @@ const test_14 = async () => {
       speakerId: speaker.id,
       prevCode: 'WAP/LBL4_E2',
       incMessage: '150000',
+      incChannel: 'WHATSAPP',
     });
     expect(action.nextCode).toEqual('WAP/LBL_RESULTS_PASS');
 
